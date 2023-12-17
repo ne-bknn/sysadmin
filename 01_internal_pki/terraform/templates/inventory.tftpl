@@ -1,0 +1,55 @@
+${yamlencode({
+  "all": {
+    "children": {
+      "infra": {
+        "hosts": {
+          "ca": {
+            "ansible_host": "${ca_public}",
+	        "ansible_user": "${username}",
+	        "ansible_ssh_private_key_file": "${private_key}",
+	        "ansible_python_interpreter": "/usr/bin/python3",
+	        "ansible_ssh_common_args": "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes",
+	        "internal_address": "${ca_internal}",
+          "fqdn": "ca.bakunin.local",
+          },
+          "dns": {
+            "ansible_host": "${dns_public}",
+	        "ansible_user": "${username}",
+	        "ansible_ssh_private_key_file": "${private_key}",
+	        "ansible_python_interpreter": "/usr/bin/python3",
+	        "ansible_ssh_common_args": "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes",
+	        "internal_address": "${dns_internal}",
+          "fqdn": "dns.bakunin.local",
+          },
+        }
+        "children": {
+        "servers": {
+            "hosts": {
+            for i, ip in servers : "${ format("server%03d", i+1) }" =>
+                {
+                    "ansible_host": "${ip}",
+                    "ansible_user": "${username}",
+                    "ansible_ssh_private_key_file": "${private_key}",
+                    "ansible_ssh_common_args": "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes",
+                    "ansible_python_interpreter": "/usr/bin/python3",
+                    "fqdn": "${ format("server-%d.bakunin.local", i+1) }",
+                }
+            }
+        },
+        "clients": {
+            "hosts": {
+            for i, ip in clients : "${ format("client%03d", i+1) }" =>
+                {
+                    "ansible_host": "${ip}",
+                    "ansible_user": "${username}",
+                    "ansible_ssh_private_key_file": "${private_key}",
+                    "ansible_ssh_common_args": "-o StrictHostKeyChecking=no -o IdentitiesOnly=yes",
+                    "ansible_python_interpreter": "/usr/bin/python3",
+                    "fqdn": "${ format("client-%d.bakunin.local", i+1) }",
+                }
+            }
+        },
+         }
+        }
+      }
+}})}

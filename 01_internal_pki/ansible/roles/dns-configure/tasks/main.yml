@@ -1,0 +1,18 @@
+---
+# configure host to use local DNS server
+
+- name: Remove old nameservers
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    regexp: "^nameserver"
+    state: absent
+  tags: dns
+  become: true
+
+- name: Configure host to use local DNS server
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: "nameserver {{ hostvars['dns']['ansible_host'] }}"
+    state: present
+  tags: dns
+  become: true

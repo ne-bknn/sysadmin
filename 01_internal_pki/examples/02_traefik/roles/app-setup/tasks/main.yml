@@ -1,0 +1,21 @@
+---
+- name: Create app directory
+  ansible.builtin.file:
+    path: app
+    state: directory
+
+- name: Copy app directory
+  ansible.builtin.copy:
+    src: app
+    dest: app
+    mode: "0644"
+
+- name: Copy docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: app/docker-compose.yml
+    mode: "0644"
+
+- name: Run docker-compose
+  community.docker.docker_compose:
+    project_src: app

@@ -1,0 +1,5 @@
+- name: Launch example nginx-step
+  hosts: server001
+  roles:
+    - step-with-reload
+    - configure-nginx

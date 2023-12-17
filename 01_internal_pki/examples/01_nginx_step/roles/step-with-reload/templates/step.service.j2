@@ -1,0 +1,14 @@
+[Unit]
+Description=Automated certificate management
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User={{ ansible_user }}
+ExecStart=/usr/bin/step ca renew --daemon /etc/step/certs/{{ fqdn }}.crt /etc/step/certs/{{ fqdn }}.key --ca-url=https://ca.bakunin.local --exec "ngix -s reload"
+
+[Install]
+WantedBy=multi-user.target

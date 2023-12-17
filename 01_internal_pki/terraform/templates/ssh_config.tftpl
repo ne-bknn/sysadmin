@@ -1,0 +1,35 @@
+Host ca
+    Hostname ${ca_ip}
+    IdentityFile ${private_key}
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    User ${username}
+    UserKnownHostsFile /dev/null
+
+Host dns
+    Hostname ${dns_ip}
+    IdentityFile ${private_key}
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+    User ${username}
+
+%{ for i, ip in servers ~}
+Host ${format("server%03d", i+1)}
+    User ${username}
+    IdentityFile ${private_key}
+    Hostname ${ip}
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+%{ endfor ~}
+
+%{ for i, ip in clients ~}
+Host ${format("client%03d", i+1)}
+    User ${username}
+    IdentityFile ${private_key}
+    Hostname ${ip}
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+%{ endfor ~}

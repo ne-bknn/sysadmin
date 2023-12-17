@@ -1,0 +1,12 @@
+- name: restart step
+  systemd:
+    name: step
+    state: restarted
+    daemon_reload: yes
+  become: true
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: true

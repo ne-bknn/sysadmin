@@ -1,0 +1,6 @@
+- name: Set up traefik example
+  hosts: server002
+  roles:
+    - tools-install
+    - traefik-setup
+    - app-setup

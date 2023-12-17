@@ -1,0 +1,55 @@
+---
+- name: Install utils
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - software-properties-common
+      - lsb-release
+      - curl
+    update_cache: true
+  become: true
+
+- name: Import docker gpg key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  become: true
+
+- name: Get lsb_release
+  ansible.builtin.command: lsb_release -cs
+  register: lsb_release
+  changed_when: false
+
+- name: Install docker deb repo
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ lsb_release.stdout }} stable"
+    state: present
+  become: true
+
+- name: Install docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    update_cache: true
+  become: true
+
+- name: Add global admin to docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+  become: true
+
+- name: Launch docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  retries: 3
+  delay: 5
+  become: true

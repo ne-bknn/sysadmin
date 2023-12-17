@@ -1,0 +1,22 @@
+events {}
+
+http {
+  server {
+    listen 443 ssl;
+    server_name {{ fqdn }};
+    
+    ssl_certificate /etc/step/certs/{{ fqdn }}.crt;
+    ssl_certificate_key /etc/step/certs/{{ fqdn }}.key;
+
+    ssl_client_certificate /root/.step/certs/root_ca.crt;
+    ssl_verify_client      optional;
+    
+    location / {
+      if ($ssl_client_verify != SUCCESS) {
+        return 403;
+      }
+      add_header Content-Type text/plain;
+      return 200 "OK! {{ fqdn }}\n";
+    }
+  }
+}

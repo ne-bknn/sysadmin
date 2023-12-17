@@ -1,0 +1,16 @@
+events {}
+
+http {
+  server {
+    listen 443 ssl;
+    server_name {{ fqdn }};
+    
+    ssl_certificate /etc/step/certs/{{ fqdn }}.crt;
+    ssl_certificate_key /etc/step/certs/{{ fqdn }}.key;
+    
+    location / {
+      add_header Content-Type text/plain;
+      return 200 "OK! {{ fqdn }}\n";
+    }
+  }
+}

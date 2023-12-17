@@ -1,0 +1,39 @@
+services:
+  traefik:
+    image: "traefik:v2.10"
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--api.dashboard=true" 
+
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+
+      - "--entrypoints.websecure.address=:443"
+
+      - "--certificatesresolvers.myresolver.acme.caserver=https://ca.bakunin.local/acme/acme/directory"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=me@bakunin.local"
+      - "--certificatesresolvers.myresolver.acme.storage=/etc/traefik/acme/acme.json"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme:/etc/traefik/acme/"
+      - /root/.step/certs/root_ca.crt:/ca.bakunin.local.crt:ro
+    networks:
+      - common
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    environment:
+      - "LEGO_CA_CERTIFICATES=/ca.bakunin.local.crt"
+
+networks:
+  common:
+    name: "traefik_common"

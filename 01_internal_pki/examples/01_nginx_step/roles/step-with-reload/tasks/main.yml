@@ -1,0 +1,7 @@
+- name: Copy step's new systemd configuration
+  ansible.builtin.template:
+    src: "step.service.j2"
+    dest: "/etc/systemd/system/step.service"
+    mode: "0644"
+  become: true
+  notify: restart step

@@ -1,0 +1,49 @@
+---
+- name: Create coredns config directory
+  ansible.builtin.file:
+    path: /etc/coredns
+    state: directory
+  become: true
+
+- name: Create coredns config file
+  ansible.builtin.copy:
+    src: Corefile
+    dest: /etc/coredns/Corefile
+    mode: "0644"
+  become: true
+
+- name: Create coredns hosts file
+  ansible.builtin.copy:
+    src: hosts
+    dest: /etc/coredns/hosts
+    mode: "0644"
+  become: true
+
+- name: Disable systemd-resolved
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  become: true
+
+- name: Disable named
+  ansible.builtin.systemd:
+    name: named
+    state: stopped
+    enabled: false
+  ignore_errors: true
+  become: true
+
+- name: Run coredns in docker
+  community.general.docker_container:
+    name: coredns
+    image: coredns/coredns:1.11.1
+    command: -conf /etc/coredns/Corefile
+    restart_policy: always
+    volumes:
+      - /etc/coredns/Corefile:/etc/coredns/Corefile
+      - /etc/coredns/hosts:/etc/coredns/hosts
+    ports:
+      - 53:53/tcp
+      - 53:53/udp

@@ -1,0 +1,16 @@
+# systemd service unit for step-ca
+# which is run with command `sudo step-ca --password-file /etc/ca-password`
+# just a web service, should use sensible defaults for everything else
+
+[Unit]
+Description=step-ca
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/step-ca --password-file /etc/ca-password
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

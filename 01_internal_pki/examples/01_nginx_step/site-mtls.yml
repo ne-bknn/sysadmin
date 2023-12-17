@@ -1,0 +1,6 @@
+- name: Launch example nginx-step-mtls
+  hosts: server001
+  roles:
+    - step-with-reload
+    - role: configure-nginx
+      nginx_config: nginx-mtls.conf.j2

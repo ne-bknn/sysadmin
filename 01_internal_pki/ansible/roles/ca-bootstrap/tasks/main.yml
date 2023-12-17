@@ -1,0 +1,53 @@
+---
+- name: Download Step CLI
+  ansible.builtin.get_url:
+    url: "https://dl.smallstep.com/cli/docs-ca-install/latest/step-cli_amd64.deb"
+    dest: "/tmp/step-cli_amd64.deb"
+    mode: "0644"
+  register: step_cli_download
+
+- name: Install step CLI
+  ansible.builtin.apt:
+    deb: /tmp/step-cli_amd64.deb
+    state: present
+  when: step_cli_download.changed
+  become: true
+
+- name: Boostrap & Install CA
+  ansible.builtin.command: >
+    step-cli ca bootstrap --ca-url=https://ca.bakunin.local:443 --force
+    --fingerprint={{ hostvars["ca"].step_ca_fingerprint }} --install
+  become: true
+
+- name: Create directory for certificates
+  ansible.builtin.file:
+    path: "/etc/step/certs"
+    state: directory
+  become: true
+
+- name: Issue certificate for host
+  ansible.builtin.command: >
+    step-cli ca certificate {{ fqdn }} /etc/step/certs/{{ fqdn }}.crt /etc/step/certs/{{ fqdn }}.key
+    --acme=https://ca.bakunin.local/acme/acme/directory --force
+  become: true
+  args:
+    creates: "/etc/step/certs/{{ fqdn }}.crt"
+
+- name: Copy step systemd service
+  ansible.builtin.template:
+    src: "step.service.j2"
+    dest: "/etc/systemd/system/step.service"
+    mode: "0644"
+  become: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: true
+
+- name: Enable step systemd service
+  ansible.builtin.service:
+    name: step
+    enabled: yes
+    state: started
+  become: true

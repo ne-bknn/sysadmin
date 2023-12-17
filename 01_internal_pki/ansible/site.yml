@@ -1,0 +1,21 @@
+---
+- name: Run coredns-install on dns machine
+  hosts: dns, server002
+  roles:
+    - docker-install
+    - coredns-install
+
+- name: Configure dns on every machine except dns
+  hosts: all,!dns
+  roles:
+    - dns-configure
+
+- name: Run StepCA on CA
+  hosts: ca
+  roles:
+    - step-ca-install
+
+- name: Bootstrap CA
+  hosts: all,!ca,!dns
+  roles:
+    - ca-bootstrap
